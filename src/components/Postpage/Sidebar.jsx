@@ -9,6 +9,7 @@ export default function Sidebar() {
       <RelatedPost />
       <Sponsors />
       <RecentPost />
+      <Sponsors />
     </div>
   );
 }

@@ -19,9 +19,10 @@ export default function Footer() {
         <div className="space-y-5">
           <img src={SiteLogo} alt="SiteLogo" className="h-8" />
           <p className="text-primary text-base">
-            NTV Online, BSEC Building (Level-8), 102 Kazi Nazrul Islam Avenue,
-            Karwan Bazar, Dhaka-1215 Telephone: +880255012281 up to 5, Fax:
-            +880255012286 up to 7
+            <span className="font-semibold text-lg">Metro News Online</span>,
+            Skyline Building (Suite 800), <br /> 1234 5th Avenue, New York, NY
+            10001 <br />
+            Telephone: +1 (212) 555-1234 up to 6
           </p>
           <SocialMenu />
         </div>
@@ -60,8 +61,8 @@ export default function Footer() {
             Download Our Android App
           </h2>
           <p className="text-primary text-base">
-            Find out more about our NTV: Latest Bangla News, Infotainment,
-            Online & Live TV
+            Find out more about our Metro News Online: Latest News,
+            Infotainment, Online & Live TV
           </p>
           <Link>
             <img src={PlayStore} alt="PlayStore" className="h-20" />

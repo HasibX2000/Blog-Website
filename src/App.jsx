@@ -4,7 +4,7 @@ import Navbar from "./components/Navigation/Navbar";
 import Homepage from "./pages/Homepage";
 import Footer from "./components/Navigation/Footer";
 import Singlepage from "./pages/Singlepage";
-import Blogpage from "./pages/Blogpage";
+import Categorypage from "./pages/Categorypage";
 
 const router = createBrowserRouter([
   {
@@ -19,7 +19,7 @@ const router = createBrowserRouter([
     path: "/news",
     element: (
       <>
-        <Navbar /> <Blogpage /> <Footer />
+        <Navbar /> <Homepage /> <Footer />
       </>
     ),
   },
@@ -28,6 +28,14 @@ const router = createBrowserRouter([
     element: (
       <>
         <Navbar /> <Singlepage /> <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/:categoryTitle",
+    element: (
+      <>
+        <Navbar /> <Categorypage /> <Footer />
       </>
     ),
   },

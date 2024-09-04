@@ -32,7 +32,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/:categoryTitle",
+    path: "/:category",
     element: (
       <>
         <Navbar /> <Categorypage /> <Footer />

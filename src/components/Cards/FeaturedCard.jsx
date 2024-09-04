@@ -1,33 +1,33 @@
 import React from "react";
 import Image from "../ui/Image";
-import Thumbnail from "../../assets/thumbnail.jpg";
 import { Link } from "react-router-dom";
+import { useGetPostByIdQuery } from "../../features/api/apiSlice";
 
 export default function FeaturedCard() {
+  const postId = "7e1c2f2e-3a4b-4b5d-8e1c-1f3a5b6c7d8e";
+  const { data: post, error, isLoading } = useGetPostByIdQuery(postId);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>; // Ensure error.message is a string
   return (
     <div className="space-y-3">
-      <Link to="/news/title">
-        <Image src={Thumbnail} />
+      <Link to={`/news/${post.title}`}>
+        <Image src={post.thumbnail} />
       </Link>
-      <div className="overflow-hidden">
-        <Link to="/news/title">
+      <div className="">
+        <Link to={`/news/${post.title}`}>
           <h2 className="text-xl font-bold text-secondary line-clamp-1 hover:text-blue-500 duration-150 hover:cursor-pointer ">
-            Innovative Tech Startup Revolutionizes Remote Work with AI-Driven
-            Solutions
+            {post.title}
           </h2>
         </Link>
-        <p className="text-secondary text-base line-clamp-6 leading-7">
-          San Francisco, CA — In a groundbreaking move, a Silicon Valley startup
-          has unveiled a suite of AI-driven tools aimed at transforming the way
-          businesses operate remotely. The startup, named Nexus Innovations,
-          launched its platform today, promising to enhance productivity and
-          collaboration for remote teams. The platform leverages advanced
-          artificial intelligence to automate routine tasks, manage workflows,
-          and provide real-time insights into team performance. According to
-          Nexus Innovations' CEO, Sarah Thompson, the platform is designed to
-          address the unique challenges faced by remote workers, including
-          communication barriers and time management.
+        <p className="text-secondary text-base line-clamp-2 leading-7">
+          {post.content}
         </p>
+        {post.featured && (
+          <div className="bg-blue-500 text-white font-semibold px-2 py-1 inline-block absolute top-4 right-4">
+            Featured
+          </div>
+        )}
       </div>
     </div>
   );

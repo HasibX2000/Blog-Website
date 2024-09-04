@@ -7,14 +7,38 @@ import Calendar from "../../assets/calendar.svg";
 
 export default function Navbar() {
   const categories = [
-    "Politics",
-    "National",
-    "International",
-    "Business",
-    "Science",
-    "Health",
-    "Entertainment",
-    "Sports",
+    {
+      categoryName: "Politics",
+      categoryId: "d5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
+    },
+    {
+      categoryName: "National",
+      categoryId: "550e8400-e29b-41d4-a716-446655440000",
+    },
+    {
+      categoryName: "International",
+      categoryId: "d0b7dbae-dc1e-4a16-9f57-75ac0d3c5c6a",
+    },
+    {
+      categoryName: "Business",
+      categoryId: "3d9bd9f2-004d-4b4e-9f14-2f9d6eb8382c",
+    },
+    {
+      categoryName: "Science",
+      categoryId: "3b241101-e2bb-4255-8d17-dc09f4ca5e61",
+    },
+    {
+      categoryName: "Health",
+      categoryId: "e2a3f6c0-8421-4d0d-9f1d-6a2bb8e2cdad",
+    },
+    {
+      categoryName: "Entertainment",
+      categoryId: "c4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+    },
+    {
+      categoryName: "Sports",
+      categoryId: "b2a3d4e5-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
+    },
   ];
 
   const [dateTime, setDateTime] = useState({
@@ -62,7 +86,7 @@ export default function Navbar() {
   };
 
   return (
-    <div className="bg-primary border-b sticky top-0 drop-shadow-sm">
+    <div className="bg-primary border-b sticky top-0 drop-shadow-sm z-50">
       <Layout className="flex justify-between items-center ">
         <Link to="/">
           <img src={SiteLogo} alt="SiteLogo" className="h-10" />
@@ -80,9 +104,9 @@ export default function Navbar() {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
                   d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
                 />
               </svg>
@@ -116,9 +140,9 @@ export default function Navbar() {
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="M4 6h16M4 12h16m-7 6h7"
             ></path>
           </svg>
@@ -142,12 +166,12 @@ export default function Navbar() {
           </Layout>
         )}
         <ul className="hidden md:flex gap-5 overflow-auto md:overflow-hidden overflow-y-hidden mb-4">
-          {categories.map((category) => (
+          {categories.map((item) => (
             <li
-              key={category}
+              key={item.categoryId}
               className="inline-block text-lg font-semibold text-secondary hover:text-blue-500 duration-150 hover:scale-105"
             >
-              <Link to={`/${category}`}>{category}</Link>
+              <Link to={`/${item.categoryName}`}>{item.categoryName}</Link>
             </li>
           ))}
         </ul>

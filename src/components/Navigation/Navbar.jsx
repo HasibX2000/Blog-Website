@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../ui/Layout";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import SiteLogo from "../../assets/logo.png";
 import Clock from "../../assets/clock.svg";
 import Calendar from "../../assets/calendar.svg";
 
 export default function Navbar() {
+  const location = useLocation();
   const categories = [
     {
       categoryName: "Politics",
@@ -81,6 +82,11 @@ export default function Navbar() {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location]);
+
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
@@ -150,16 +156,14 @@ export default function Navbar() {
       </Layout>
       <div className="relative md:flex justify-center items-center ">
         {menuOpen && (
-          <Layout className="py-0">
+          <Layout className="py-custom">
             <ul className="absolute top-full left-0 right-0 border bg-white grid grid-cols-2 gap-2 p-3 px-5 md:hidden">
-              {categories.map((category) => (
+              {categories.map((item) => (
                 <li
-                  key={category}
+                  key={item.categoryId}
                   className="text-lg font-semibold text-secondary hover:text-blue-500 duration-150"
                 >
-                  <Link to={`/${category}`} onClick={() => setMenuOpen(false)}>
-                    {category}
-                  </Link>
+                  <Link to={`/${item.categoryName}`}>{item.categoryName}</Link>
                 </li>
               ))}
             </ul>

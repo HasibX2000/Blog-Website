@@ -10,6 +10,9 @@ export default {
       fontFamily: {
         titillium: ["Titillium Web", "sans-serif"],
       },
+      padding: {
+        custom: "0",
+      },
     },
   },
   plugins: [],

@@ -3,10 +3,10 @@ import RelatedPost from "./RelatedPost";
 import RecentPost from "./RecentPost";
 import Sponsors from "./Sponsors";
 
-export default function Sidebar() {
+export default function Sidebar({ post }) {
   return (
     <div className="space-y-5">
-      <RelatedPost />
+      <RelatedPost postId={post.id} />
       <Sponsors />
       <RecentPost />
       <Sponsors />

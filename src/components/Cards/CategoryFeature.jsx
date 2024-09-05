@@ -2,6 +2,7 @@ import React from "react";
 import NewsCard from "./NewsCard";
 import Layout from "../ui/Layout";
 import { useGetPostsByCategoryQuery } from "../../features/api/apiSlice";
+import Loading from "../ui/Loading";
 
 export default function CategoryFeature({ category }) {
   const { categoryId } = category;
@@ -13,11 +14,7 @@ export default function CategoryFeature({ category }) {
   } = useGetPostsByCategoryQuery(categoryId);
 
   if (isPostsLoading) {
-    return (
-      <Layout className="flex justify-center items-center py-32">
-        <h2>Loading...</h2>
-      </Layout>
-    );
+    return <Loading />;
   }
 
   if (postsError) {

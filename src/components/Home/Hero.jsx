@@ -3,6 +3,7 @@ import Layout from "../ui/Layout";
 import NewsCard from "../Cards/NewsCard";
 import FeaturedCard from "../Cards/FeaturedCard";
 import { useGetLatestPostsQuery } from "../../features/api/apiSlice";
+import Loading from "../ui/Loading";
 
 export default function Hero() {
   const {
@@ -14,13 +15,7 @@ export default function Hero() {
   const [firstItem, ...remainingItems] = latestPosts || [];
   let content = null;
   if (isLoading) {
-    content = (
-      <div>
-        <Layout>
-          <h2>Loading...</h2>
-        </Layout>
-      </div>
-    );
+    content = <Loading />;
   } else if (error) {
     content = (
       <div>

@@ -4,13 +4,14 @@ import Sidebar from "../components/Postpage/Sidebar";
 import Layout from "../components/ui/Layout";
 import { useGetPostByTitleQuery } from "../features/api/apiSlice";
 import { useParams } from "react-router-dom";
+import Loading from "../components/ui/Loading";
 
 export default function Singlepage() {
   const { title } = useParams();
 
   const { data: post, error, isLoading } = useGetPostByTitleQuery(title) || {};
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>; // Ensure error.message is a string
 
   return (

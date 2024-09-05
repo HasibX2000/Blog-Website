@@ -2,11 +2,12 @@ import React from "react";
 import Image from "../ui/Image";
 import { Link } from "react-router-dom";
 import { useGetPostByIdQuery } from "../../features/api/apiSlice";
+import Loading from "../ui/Loading";
 
 export default function NewsCard({ postId }) {
   const { data: post, error, isLoading } = useGetPostByIdQuery(postId);
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>; // Ensure error.message is a string
 
   return (

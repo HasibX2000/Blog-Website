@@ -7,6 +7,7 @@ import {
   useGetPostsByCategoryQuery,
 } from "../features/api/apiSlice";
 import { useParams } from "react-router-dom";
+import Loading from "../components/ui/Loading";
 
 export default function CategoryPage() {
   const { category } = useParams();
@@ -26,11 +27,7 @@ export default function CategoryPage() {
   } = useGetPostsByCategoryQuery(categoryId);
 
   if (isCategoryLoading || isPostsLoading) {
-    return (
-      <Layout className="flex justify-center items-center py-32">
-        <h2>Loading...</h2>
-      </Layout>
-    );
+    return <Loading />;
   }
 
   if (categoryError || postsError) {

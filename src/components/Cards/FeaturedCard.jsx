@@ -2,12 +2,13 @@ import React from "react";
 import Image from "../ui/Image";
 import { Link } from "react-router-dom";
 import { useGetPostByIdQuery } from "../../features/api/apiSlice";
+import Loading from "../ui/Loading";
 
 export default function FeaturedCard() {
   const postId = "7e1c2f2e-3a4b-4b5d-8e1c-1f3a5b6c7d8e";
   const { data: post, error, isLoading } = useGetPostByIdQuery(postId);
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>; // Ensure error.message is a string
   return (
     <div className="space-y-3">

@@ -1,37 +1,15 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import supabase from "../../configs/supabase";
 
-// Define constants for local storage key and cache duration
-const LOCAL_STORAGE_KEY = "postsApiData";
-const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour in milliseconds
-
-function saveToLocalStorage(key, data) {
-  const timestamp = new Date().getTime();
-  localStorage.setItem(key, JSON.stringify({ timestamp, data }));
-}
-
-function getFromLocalStorage(key) {
-  const cachedData = localStorage.getItem(key);
-  if (cachedData) {
-    const { timestamp, data } = JSON.parse(cachedData);
-    if (new Date().getTime() - timestamp < CACHE_DURATION_MS) {
-      return data;
-    }
-  }
-  return null;
-}
-
 export const postsApi = createApi({
   reducerPath: "postsApi",
   baseQuery: async (args, api, extraOptions) => {
-    const { categoryId, postId, categoryName, postTitle } = args;
+    const { categoryId, postId, categoryName, postTitle, relatedPostId } = args;
 
-    let cacheKey = "";
     let fetchFunction;
 
-    // Determine which cache key and fetch function to use
+    // Determine which fetch function to use
     if (categoryId) {
-      cacheKey = `postsByCategory-${categoryId}`;
       fetchFunction = async () => {
         const { data: postIdsData, error: postIdsError } = await supabase
           .from("post_categories")
@@ -56,7 +34,6 @@ export const postsApi = createApi({
         return posts;
       };
     } else if (postId) {
-      cacheKey = `postById-${postId}`;
       fetchFunction = async () => {
         const { data: post, error: postError } = await supabase
           .from("posts")
@@ -71,7 +48,6 @@ export const postsApi = createApi({
         return post;
       };
     } else if (postTitle) {
-      cacheKey = `postByTitle-${postTitle}`;
       fetchFunction = async () => {
         const { data: post, error: postError } = await supabase
           .from("posts")
@@ -86,7 +62,6 @@ export const postsApi = createApi({
         return post;
       };
     } else if (categoryName) {
-      cacheKey = `categoryIdByName-${categoryName}`;
       fetchFunction = async () => {
         const { data: categoryData, error: categoryError } = await supabase
           .from("categories")
@@ -100,20 +75,58 @@ export const postsApi = createApi({
 
         return { categoryId: categoryData.id };
       };
+    } else if (relatedPostId) {
+      fetchFunction = async () => {
+        // Step 1: Get the categories of the post with the given postId
+        const { data: categoryData, error: categoryError } = await supabase
+          .from("post_categories")
+          .select("category_id")
+          .eq("post_id", relatedPostId)
+          .limit(1); // Only select the first category (if multiple)
+
+        if (categoryError) {
+          throw new Error(categoryError.message);
+        }
+
+        if (!categoryData || categoryData.length === 0) {
+          throw new Error("No categories found for the post.");
+        }
+
+        const firstCategoryId = categoryData[0].category_id;
+
+        // Step 2: Get the post IDs in that category
+        const { data: postIdsData, error: postIdsError } = await supabase
+          .from("post_categories")
+          .select("post_id")
+          .eq("category_id", firstCategoryId);
+
+        if (postIdsError) {
+          throw new Error(postIdsError.message);
+        }
+
+        const postIds = postIdsData.map((item) => item.post_id);
+
+        // Step 3: Fetch all posts in that category excluding the current post
+        const { data: relatedPosts, error: relatedPostsError } = await supabase
+          .from("posts")
+          .select("*")
+          .in("id", postIds)
+          .neq("id", relatedPostId) // Exclude the current post
+          .limit(5); // Limit to 5 related posts
+
+        if (relatedPostsError) {
+          throw new Error(relatedPostsError.message);
+        }
+
+        return relatedPosts;
+      };
     } else {
       return { error: { message: "No valid ID, title, or name provided" } };
     }
 
-    // Try to get data from local storage
-    const cachedData = getFromLocalStorage(cacheKey);
-    if (cachedData) {
-      return { data: cachedData };
-    }
-
-    // Fetch new data and save to local storage
+    // Fetch new data
     try {
       const data = await fetchFunction();
-      saveToLocalStorage(cacheKey, data);
       return { data };
     } catch (error) {
       return { error: { message: error.message } };
@@ -122,15 +135,22 @@ export const postsApi = createApi({
   endpoints: (builder) => ({
     getPostsByCategory: builder.query({
       query: (categoryId) => ({ categoryId }),
+      keepUnusedDataFor: 3600,
     }),
     getPostById: builder.query({
       query: (postId) => ({ postId }),
     }),
     getCategoryId: builder.query({
       query: (categoryName) => ({ categoryName }),
+      keepUnusedDataFor: 3600,
     }),
     getPostByTitle: builder.query({
       query: (postTitle) => ({ postTitle }),
+      keepUnusedDataFor: 3600,
+    }),
+    getRelatedPosts: builder.query({
+      query: (relatedPostId) => ({ relatedPostId }),
+      keepUnusedDataFor: 3600,
     }),
     getLatestPosts: builder.query({
       queryFn: async () => {
@@ -146,6 +166,7 @@ export const postsApi = createApi({
 
         return { data: posts };
       },
+      keepUnusedDataFor: 3600,
     }),
   }),
 });
@@ -155,6 +176,7 @@ export const {
   useGetPostByIdQuery,
   useGetCategoryIdQuery,
   useGetPostByTitleQuery,
+  useGetRelatedPostsQuery,
   useGetLatestPostsQuery,
 } = postsApi;
 

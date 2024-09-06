@@ -1,6 +1,6 @@
 import React from "react";
 import MiniPost from "./MiniPost";
-import { useGetLatestPostsQuery } from "../../features/api/apiSlice";
+import { useGetLatestPostsQuery } from "../../features/news/newsApi";
 import Layout from "../ui/Layout";
 
 export default function RecentPost() {

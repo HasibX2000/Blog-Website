@@ -1,8 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import supabase from "../../configs/supabase";
 
-export const postsApi = createApi({
-  reducerPath: "postsApi",
+export const apiSlice = createApi({
+  reducerPath: "apiSlice",
   baseQuery: async (args, api, extraOptions) => {
     const { categoryId, postId, categoryName, postTitle, relatedPostId } = args;
 
@@ -132,52 +132,12 @@ export const postsApi = createApi({
       return { error: { message: error.message } };
     }
   },
+  tagTypes: ["User", "Posts"], // Define your tag types here
   endpoints: (builder) => ({
-    getPostsByCategory: builder.query({
-      query: (categoryId) => ({ categoryId }),
-      keepUnusedDataFor: 3600,
-    }),
-    getPostById: builder.query({
-      query: (postId) => ({ postId }),
-    }),
-    getCategoryId: builder.query({
-      query: (categoryName) => ({ categoryName }),
-      keepUnusedDataFor: 3600,
-    }),
-    getPostByTitle: builder.query({
-      query: (postTitle) => ({ postTitle }),
-      keepUnusedDataFor: 3600,
-    }),
-    getRelatedPosts: builder.query({
-      query: (relatedPostId) => ({ relatedPostId }),
-      keepUnusedDataFor: 3600,
-    }),
-    getLatestPosts: builder.query({
-      queryFn: async () => {
-        const { data: posts, error: postsError } = await supabase
-          .from("posts")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(5);
-
-        if (postsError) {
-          return { error: { message: postsError.message } };
-        }
-
-        return { data: posts };
-      },
-      keepUnusedDataFor: 3600,
-    }),
+    // endpoints here
   }),
 });
 
-export const {
-  useGetPostsByCategoryQuery,
-  useGetPostByIdQuery,
-  useGetCategoryIdQuery,
-  useGetPostByTitleQuery,
-  useGetRelatedPostsQuery,
-  useGetLatestPostsQuery,
-} = postsApi;
+export const {} = apiSlice;
 
-export default postsApi;
+export default apiSlice;

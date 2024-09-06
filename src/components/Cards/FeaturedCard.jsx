@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "../ui/Image";
 import { Link } from "react-router-dom";
-import { useGetPostByIdQuery } from "../../features/api/apiSlice";
+import { useGetPostByIdQuery } from "../../features/news/newsApi";
 import Loading from "../ui/Loading";
 
 export default function FeaturedCard() {

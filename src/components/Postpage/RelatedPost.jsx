@@ -1,6 +1,6 @@
 import React from "react";
 import MiniPost from "./MiniPost";
-import { useGetRelatedPostsQuery } from "../../features/api/apiSlice";
+import { useGetRelatedPostsQuery } from "../../features/news/newsApi";
 import Layout from "../ui/Layout";
 import Loading from "../ui/Loading";
 

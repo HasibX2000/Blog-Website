@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import SiteLogo from "../../assets/logo.png";
 import Clock from "../../assets/clock.svg";
 import Calendar from "../../assets/calendar.svg";
+import CurrentUser from "../Auth/CurrentUser";
 
 export default function Navbar() {
   const location = useLocation();
@@ -163,7 +164,9 @@ export default function Navbar() {
                   key={item.categoryId}
                   className="text-lg font-semibold text-secondary hover:text-blue-500 duration-150"
                 >
-                  <Link to={`/${item.categoryName}`}>{item.categoryName}</Link>
+                  <Link to={`/category/${item.categoryName}`}>
+                    {item.categoryName}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -175,10 +178,16 @@ export default function Navbar() {
               key={item.categoryId}
               className="inline-block text-lg font-semibold text-secondary hover:text-blue-500 duration-150 hover:scale-105"
             >
-              <Link to={`/${item.categoryName}`}>{item.categoryName}</Link>
+              <Link to={`/category/${item.categoryName}`}>
+                {item.categoryName}
+              </Link>
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="flex justify-center items-center mb-5">
+        <CurrentUser />
       </div>
     </div>
   );

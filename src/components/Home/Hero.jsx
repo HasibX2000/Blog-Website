@@ -2,7 +2,8 @@ import React from "react";
 import Layout from "../ui/Layout";
 import NewsCard from "../Cards/NewsCard";
 import FeaturedCard from "../Cards/FeaturedCard";
-import { useGetLatestPostsQuery } from "../../features/api/apiSlice";
+import { useGetLatestPostsQuery } from "../../features/news/newsApi";
+
 import Loading from "../ui/Loading";
 
 export default function Hero() {

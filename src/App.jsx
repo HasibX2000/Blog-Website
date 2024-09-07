@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import supabase from "./configs/supabase";
 import { clearUser, setUser } from "./features/auth/authSlice";
 import Authpage from "./pages/Authpage";
+import Addnews from "./pages/Addnews";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
     element: (
       <>
         <Navbar /> <Authpage /> <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/add",
+    element: (
+      <>
+        <Navbar /> <Addnews /> <Footer />
       </>
     ),
   },

@@ -4,15 +4,11 @@ import supabase from "../../configs/supabase";
 const newsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getPostsByCategory: builder.query({
-      query: (categoryId) => ({ categoryId }),
+      query: (categoryName) => ({ categoryName }),
       keepUnusedDataFor: 3600,
     }),
     getPostById: builder.query({
       query: (postId) => ({ postId }),
-    }),
-    getCategoryId: builder.query({
-      query: (categoryName) => ({ categoryName }),
-      keepUnusedDataFor: 3600,
     }),
     getPostByTitle: builder.query({
       query: (postTitle) => ({ postTitle }),
@@ -44,8 +40,9 @@ const newsApi = apiSlice.injectEndpoints({
 export const {
   useGetPostsByCategoryQuery,
   useGetPostByIdQuery,
-  useGetCategoryIdQuery,
   useGetPostByTitleQuery,
   useGetRelatedPostsQuery,
   useGetLatestPostsQuery,
 } = newsApi;
+
+export default newsApi;

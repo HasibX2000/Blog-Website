@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function MiniPost({ post }) {
   const { title, thumbnail, created_at } = post;
+  const date = created_at.slice(0, 10);
   return (
     <div className="grid grid-cols-[90px_auto] gap-4">
       <Image src={thumbnail} className="w-20 aspect-[3/2]" />
@@ -13,7 +14,7 @@ export default function MiniPost({ post }) {
             {title}
           </h2>
         </Link>
-        <p className=" text-sm">{created_at}</p>
+        <p className=" text-sm">{date}</p>
       </div>
     </div>
   );

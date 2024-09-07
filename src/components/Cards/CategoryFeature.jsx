@@ -5,13 +5,11 @@ import { useGetPostsByCategoryQuery } from "../../features/news/newsApi";
 import Loading from "../ui/Loading";
 
 export default function CategoryFeature({ category }) {
-  const { categoryId } = category;
-
   const {
     data: postsData,
     error: postsError,
     isLoading: isPostsLoading,
-  } = useGetPostsByCategoryQuery(categoryId);
+  } = useGetPostsByCategoryQuery(category);
 
   if (isPostsLoading) {
     return <Loading />;
@@ -29,7 +27,7 @@ export default function CategoryFeature({ category }) {
     postsData.length > 0 && (
       <Layout>
         <h2 className="bg-secondary px-5 py-1 text-primary  font-semibold text-lg inline-block">
-          {category.categoryName}
+          {category}
         </h2>
         <hr />
         <div className=" mt-5 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">

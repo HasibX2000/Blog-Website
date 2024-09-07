@@ -15,7 +15,7 @@ export default function Singlepage() {
   if (error) return <p>Error: {error.message}</p>; // Ensure error.message is a string
 
   return (
-    <Layout className="grid grid-cols-1 md:grid-cols-[auto_minmax(300px,1fr)] lg:grid-cols-[auto_minmax(450px,1fr)] gap-10">
+    <Layout className="grid grid-cols-1 md:grid-cols-[auto_300px] lg:grid-cols-[auto_450px] gap-10">
       <Post post={post} />
       <Sidebar post={post} />
     </Layout>

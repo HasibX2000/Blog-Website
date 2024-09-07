@@ -17,13 +17,11 @@ export default function NewsCard({ postId }) {
       </Link>
       <div className="">
         <Link to={`/news/${post.title}`}>
-          <h2 className="text-xl font-bold text-secondary line-clamp-1 hover:text-blue-500 duration-150 hover:cursor-pointer ">
+          <h2 className="text-xl font-bold text-secondary line-clamp-2 hover:text-blue-500 duration-150 hover:cursor-pointer ">
             {post.title}
           </h2>
         </Link>
-        <p className="text-secondary text-base line-clamp-2 leading-7">
-          {post.content}
-        </p>
+
         {post.featured && (
           <div className="bg-blue-500 text-white font-semibold px-2 py-1 inline-block absolute top-4 right-4">
             Featured

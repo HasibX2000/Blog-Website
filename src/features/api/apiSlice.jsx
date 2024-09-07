@@ -4,28 +4,17 @@ import supabase from "../../configs/supabase";
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
   baseQuery: async (args, api, extraOptions) => {
-    const { categoryId, postId, categoryName, postTitle, relatedPostId } = args;
+    const { categoryName, postId, postTitle, relatedPostId } = args;
 
     let fetchFunction;
 
     // Determine which fetch function to use
-    if (categoryId) {
+    if (categoryName) {
       fetchFunction = async () => {
-        const { data: postIdsData, error: postIdsError } = await supabase
-          .from("post_categories")
-          .select("post_id")
-          .eq("category_id", categoryId);
-
-        if (postIdsError) {
-          throw new Error(postIdsError.message);
-        }
-
-        const postIds = postIdsData.map((item) => item.post_id);
-
         const { data: posts, error: postsError } = await supabase
           .from("posts")
           .select("*")
-          .in("id", postIds);
+          .eq("category", categoryName);
 
         if (postsError) {
           throw new Error(postsError.message);
@@ -61,56 +50,30 @@ export const apiSlice = createApi({
 
         return post;
       };
-    } else if (categoryName) {
-      fetchFunction = async () => {
-        const { data: categoryData, error: categoryError } = await supabase
-          .from("categories")
-          .select("id")
-          .eq("name", categoryName)
-          .single();
-
-        if (categoryError) {
-          throw new Error(categoryError.message);
-        }
-
-        return { categoryId: categoryData.id };
-      };
     } else if (relatedPostId) {
       fetchFunction = async () => {
-        // Step 1: Get the categories of the post with the given postId
-        const { data: categoryData, error: categoryError } = await supabase
-          .from("post_categories")
-          .select("category_id")
-          .eq("post_id", relatedPostId)
-          .limit(1); // Only select the first category (if multiple)
+        // Step 1: Get the category of the post with the given postId
+        const { data: postData, error: postError } = await supabase
+          .from("posts")
+          .select("category")
+          .eq("id", relatedPostId)
+          .single();
 
-        if (categoryError) {
-          throw new Error(categoryError.message);
+        if (postError) {
+          throw new Error(postError.message);
         }
 
-        if (!categoryData || categoryData.length === 0) {
-          throw new Error("No categories found for the post.");
+        if (!postData) {
+          throw new Error("Post not found.");
         }
 
-        const firstCategoryId = categoryData[0].category_id;
+        const category = postData.category;
 
-        // Step 2: Get the post IDs in that category
-        const { data: postIdsData, error: postIdsError } = await supabase
-          .from("post_categories")
-          .select("post_id")
-          .eq("category_id", firstCategoryId);
-
-        if (postIdsError) {
-          throw new Error(postIdsError.message);
-        }
-
-        const postIds = postIdsData.map((item) => item.post_id);
-
-        // Step 3: Fetch all posts in that category excluding the current post
+        // Step 2: Get related posts in the same category
         const { data: relatedPosts, error: relatedPostsError } = await supabase
           .from("posts")
           .select("*")
-          .in("id", postIds)
+          .eq("category", category)
           .neq("id", relatedPostId) // Exclude the current post
           .limit(5); // Limit to 5 related posts
 
@@ -134,7 +97,7 @@ export const apiSlice = createApi({
   },
   tagTypes: ["User", "Posts"], // Define your tag types here
   endpoints: (builder) => ({
-    // endpoints here
+    // Define your endpoints here
   }),
 });
 

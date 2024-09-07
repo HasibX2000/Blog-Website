@@ -28,6 +28,13 @@ const CurrentUser = () => {
       {!isLoading && isLoggedIn ? (
         <div className="flex items-center gap-5">
           <p>Hello {user?.email}</p>
+          <Link
+            to="/add"
+            className="bg-blue-500 text-white px-4 py-1 
+           "
+          >
+            Add News
+          </Link>
           <button
             onClick={handleLogout}
             className={`bg-blue-500 text-white px-4 py-1 ${

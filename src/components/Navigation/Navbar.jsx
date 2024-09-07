@@ -9,38 +9,14 @@ import CurrentUser from "../Auth/CurrentUser";
 export default function Navbar() {
   const location = useLocation();
   const categories = [
-    {
-      categoryName: "Politics",
-      categoryId: "d5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
-    },
-    {
-      categoryName: "National",
-      categoryId: "550e8400-e29b-41d4-a716-446655440000",
-    },
-    {
-      categoryName: "International",
-      categoryId: "d0b7dbae-dc1e-4a16-9f57-75ac0d3c5c6a",
-    },
-    {
-      categoryName: "Business",
-      categoryId: "3d9bd9f2-004d-4b4e-9f14-2f9d6eb8382c",
-    },
-    {
-      categoryName: "Science",
-      categoryId: "3b241101-e2bb-4255-8d17-dc09f4ca5e61",
-    },
-    {
-      categoryName: "Health",
-      categoryId: "e2a3f6c0-8421-4d0d-9f1d-6a2bb8e2cdad",
-    },
-    {
-      categoryName: "Entertainment",
-      categoryId: "c4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
-    },
-    {
-      categoryName: "Sports",
-      categoryId: "b2a3d4e5-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
-    },
+    "Science",
+    "Business",
+    "National",
+    "Sports",
+    "Entertainment",
+    "International",
+    "Politics",
+    "Health",
   ];
 
   const [dateTime, setDateTime] = useState({
@@ -159,28 +135,24 @@ export default function Navbar() {
         {menuOpen && (
           <Layout className="py-custom">
             <ul className="absolute top-full left-0 right-0 border bg-white grid grid-cols-2 gap-2 p-3 px-5 md:hidden">
-              {categories.map((item) => (
+              {categories.map((categoryName) => (
                 <li
-                  key={item.categoryId}
+                  key={categoryName}
                   className="text-lg font-semibold text-secondary hover:text-blue-500 duration-150"
                 >
-                  <Link to={`/category/${item.categoryName}`}>
-                    {item.categoryName}
-                  </Link>
+                  <Link to={`/category/${categoryName}`}>{categoryName}</Link>
                 </li>
               ))}
             </ul>
           </Layout>
         )}
         <ul className="hidden md:flex gap-5 overflow-auto md:overflow-hidden overflow-y-hidden mb-4">
-          {categories.map((item) => (
+          {categories.map((categoryName) => (
             <li
-              key={item.categoryId}
+              key={categoryName}
               className="inline-block text-lg font-semibold text-secondary hover:text-blue-500 duration-150 hover:scale-105"
             >
-              <Link to={`/category/${item.categoryName}`}>
-                {item.categoryName}
-              </Link>
+              <Link to={`/category/${categoryName}`}>{categoryName}</Link>
             </li>
           ))}
         </ul>

@@ -1,3 +1,7 @@
+// File: Form.js
+// This component represents a form for creating new posts. It includes fields for title, content, category,
+// thumbnail URL, and a featured checkbox. It uses JoditEditor for rich text content editing.
+
 import React, { useState, useRef, useMemo } from "react";
 import { useCreatePostMutation } from "../../features/api/apiSlice";
 import { v4 as uuidv4 } from "uuid";
@@ -5,15 +9,18 @@ import { useNavigate } from "react-router-dom";
 import JoditEditor from "jodit-react";
 
 const Form = () => {
+  // Configuration for JoditEditor
   const placeholder = "Start typing";
   const editor = useRef(null);
   const config = useMemo(
     () => ({
-      readonly: false, // all options from https://xdsoft.net/jodit/docs/
-      placeholder: "Start typings...",
+      readonly: false, // Editor is editable
+      placeholder: "Start typing...",
     }),
     [placeholder]
   );
+
+  // List of categories for post selection
   const categories = [
     "Science",
     "Business",
@@ -24,6 +31,8 @@ const Form = () => {
     "Politics",
     "Health",
   ];
+
+  // State to manage form data
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -31,9 +40,14 @@ const Form = () => {
     thumbnail: "",
     featured: false,
   });
+
+  // Hook for navigation
   const navigate = useNavigate();
+
+  // Mutation hook for creating a new post
   const [createPost, { isLoading, isSuccess }] = useCreatePostMutation();
 
+  // Handle changes in form fields
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -42,15 +56,14 @@ const Form = () => {
     });
   };
 
+  // Handle changes in JoditEditor content
   const handleEditorChange = (content) => {
     setFormData((prev) => ({ ...prev, content }));
   };
 
+  // Get the current UTC date and time formatted as 'YYYY-MM-DD HH:MM:SS'
   const getFormattedDate = () => {
-    // Get the current UTC date and time
     const date = new Date();
-
-    // Format the date and time in 'YYYY-MM-DD HH:MM:SS' format
     const formattedDate = date
       .toLocaleString("en-CA", {
         timeZone: "UTC",
@@ -62,27 +75,28 @@ const Form = () => {
         second: "2-digit",
         hour12: false,
       })
-      .replace(",", ""); // Replace any commas
-
-    // Add +00 (UTC) at the end
-    return `${formattedDate}+00`;
+      .replace(",", ""); // Remove any commas
+    return `${formattedDate}+00`; // Add UTC offset
   };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const timestamp = getFormattedDate();
 
+    // Prepare new post data
     const newPostData = {
       ...formData,
       created_at: timestamp,
-      id: uuidv4(),
+      id: uuidv4(), // Generate a unique ID for the post
     };
 
     try {
       await createPost(newPostData).unwrap();
-      navigate("/", { replace: true });
+      navigate("/", { replace: true }); // Navigate to homepage on successful post creation
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error("Error creating post:", error); // Log any errors during post creation
     }
   };
 
@@ -114,8 +128,8 @@ const Form = () => {
             ref={editor}
             value={formData.content}
             config={config}
-            tabIndex={1} // tabIndex of textarea
-            onBlur={handleEditorChange}
+            tabIndex={1} // Tab index for the editor
+            onBlur={handleEditorChange} // Update form data on editor blur
           />
         </div>
 

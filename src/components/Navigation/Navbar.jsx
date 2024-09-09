@@ -1,13 +1,20 @@
+// File: Navbar.js
+// This component represents the navigation bar of the website. It includes site branding, search functionality,
+// date and time display, a responsive menu, and user information.
+
 import React, { useEffect, useState } from "react";
-import Layout from "../ui/Layout";
-import { Link, useLocation } from "react-router-dom";
-import SiteLogo from "../../assets/logo.png";
-import Clock from "../../assets/clock.svg";
-import Calendar from "../../assets/calendar.svg";
-import CurrentUser from "../Auth/CurrentUser";
+import Layout from "../ui/Layout"; // Layout component to structure the navbar
+import { Link, useLocation } from "react-router-dom"; // Link component for navigation, useLocation for route info
+import SiteLogo from "../../assets/logo.png"; // Path to the site logo image
+import Clock from "../../assets/clock.svg"; // Path to the clock icon
+import Calendar from "../../assets/calendar.svg"; // Path to the calendar icon
+import CurrentUser from "../Auth/CurrentUser"; // Component to display current user info
 
 export default function Navbar() {
+  // Get the current location object to determine the current route
   const location = useLocation();
+
+  // Array of category names for the navigation menu
   const categories = [
     "Science",
     "Business",
@@ -19,6 +26,7 @@ export default function Navbar() {
     "Health",
   ];
 
+  // State for storing the current date and time
   const [dateTime, setDateTime] = useState({
     date: new Date().toLocaleDateString(),
     time: new Date().toLocaleTimeString({
@@ -28,8 +36,10 @@ export default function Navbar() {
     }),
   });
 
+  // State to control the mobile menu visibility
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Update date and time every second
   useEffect(() => {
     const interval = setInterval(() => {
       setDateTime({
@@ -43,9 +53,11 @@ export default function Navbar() {
       });
     }, 1000);
 
+    // Cleanup the interval on component unmount
     return () => clearInterval(interval);
   }, []);
 
+  // Handle window resize to close the mobile menu when the screen is resized to a larger size
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -55,12 +67,14 @@ export default function Navbar() {
 
     window.addEventListener("resize", handleResize);
 
-    // Check on initial load
+    // Check initial window size on load
     handleResize();
 
+    // Cleanup event listener on component unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Scroll to the top of the page when navigating to the homepage
   useEffect(() => {
     if (location.pathname === "/") {
       window.scrollTo({
@@ -68,20 +82,23 @@ export default function Navbar() {
         behavior: "smooth",
       });
     }
-    setMenuOpen(false);
+    setMenuOpen(false); // Close mobile menu on route change
   }, [location]);
 
+  // Toggle mobile menu visibility
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
   return (
     <div className="bg-primary border-b sticky top-0 drop-shadow-sm z-50">
-      <Layout className="flex justify-between items-center ">
+      <Layout className="flex justify-between items-center">
+        {/* Site logo with link to homepage */}
         <Link to="/">
           <img src={SiteLogo} alt="SiteLogo" className="h-10" />
         </Link>
 
+        {/* Search form for larger screens */}
         <form className="w-1/4 hidden md:block">
           <div className="relative">
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -110,6 +127,8 @@ export default function Navbar() {
             />
           </div>
         </form>
+
+        {/* Display date and time for larger screens */}
         <div className="space-y-1 hidden md:block">
           <p className="text-secondary flex items-center gap-2">
             <img src={Clock} alt="clock" /> {dateTime.time}
@@ -118,6 +137,8 @@ export default function Navbar() {
             <img src={Calendar} alt="Calendar" /> {dateTime.date}
           </p>
         </div>
+
+        {/* Mobile menu button */}
         <button
           className="block md:hidden text-secondary focus:outline-none"
           onClick={toggleMenu}
@@ -138,7 +159,9 @@ export default function Navbar() {
           </svg>
         </button>
       </Layout>
-      <div className="relative md:flex justify-center items-center ">
+
+      {/* Mobile menu items */}
+      <div className="relative md:flex justify-center items-center">
         {menuOpen && (
           <Layout className="py-custom">
             <ul className="absolute top-full left-0 right-0 border bg-white grid grid-cols-2 gap-2 p-3 px-5 md:hidden">
@@ -153,6 +176,8 @@ export default function Navbar() {
             </ul>
           </Layout>
         )}
+
+        {/* Desktop menu items */}
         <ul className="hidden md:flex gap-5 overflow-auto md:overflow-hidden overflow-y-hidden mb-4">
           {categories.map((categoryName) => (
             <li
@@ -165,6 +190,7 @@ export default function Navbar() {
         </ul>
       </div>
 
+      {/* Display current user information */}
       <div className="flex justify-center items-center mb-5">
         <CurrentUser />
       </div>

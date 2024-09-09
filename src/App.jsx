@@ -14,6 +14,7 @@ import supabase from "./configs/supabase";
 import { clearUser, setUser } from "./features/auth/authSlice";
 import Authpage from "./pages/Authpage";
 import Addnews from "./pages/Addnews";
+import Editpage from "./pages/Editpage";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,14 @@ const router = createBrowserRouter([
     element: (
       <>
         <Navbar /> <Singlepage /> <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/news/:id/edit",
+    element: (
+      <>
+        <Navbar /> <Editpage /> <Footer />
       </>
     ),
   },

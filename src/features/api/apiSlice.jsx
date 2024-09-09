@@ -1,18 +1,23 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import supabase from "../../configs/supabase";
 
+// Define the API slice for interacting with Supabase
 export const apiSlice = createApi({
-  reducerPath: "apiSlice",
+  reducerPath: "apiSlice", // The slice's key in the Redux store
   baseQuery: async (args, api, extraOptions) => {
+    // Extract arguments from the `args` object
     const {
       newPost,
       deletePostId,
+      updatePostId,
+      updatePostData,
       categoryName,
       postId,
       postTitle,
       relatedPostId,
     } = args;
 
+    // Handle creating a new post
     if (newPost) {
       try {
         const { data, error } = await supabase
@@ -30,6 +35,7 @@ export const apiSlice = createApi({
       }
     }
 
+    // Handle deleting a post
     if (deletePostId) {
       try {
         const { data, error } = await supabase
@@ -47,8 +53,28 @@ export const apiSlice = createApi({
       }
     }
 
+    // Handle updating a post
+    if (updatePostId && updatePostData) {
+      try {
+        const { data, error } = await supabase
+          .from("posts")
+          .update(updatePostData)
+          .match({ id: updatePostId });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return { data };
+      } catch (error) {
+        return { error: { message: error.message } };
+      }
+    }
+
+    // Define a function to fetch data based on the provided arguments
     let fetchFunction;
 
+    // Fetch posts by category
     if (categoryName) {
       fetchFunction = async () => {
         const { data: posts, error: postsError } = await supabase
@@ -62,7 +88,9 @@ export const apiSlice = createApi({
 
         return posts;
       };
-    } else if (postId) {
+    }
+    // Fetch post by ID
+    else if (postId) {
       fetchFunction = async () => {
         const { data: post, error: postError } = await supabase
           .from("posts")
@@ -76,7 +104,9 @@ export const apiSlice = createApi({
 
         return post;
       };
-    } else if (postTitle) {
+    }
+    // Fetch post by title
+    else if (postTitle) {
       fetchFunction = async () => {
         const { data: post, error: postError } = await supabase
           .from("posts")
@@ -90,7 +120,9 @@ export const apiSlice = createApi({
 
         return post;
       };
-    } else if (relatedPostId) {
+    }
+    // Fetch related posts based on the category of the related post
+    else if (relatedPostId) {
       fetchFunction = async () => {
         const { data: postData, error: postError } = await supabase
           .from("posts")
@@ -132,15 +164,16 @@ export const apiSlice = createApi({
       return { error: { message: error.message } };
     }
   },
-  tagTypes: ["Categories", "Related", "Latest", "Posts"],
+  tagTypes: ["Categories", "Related", "Latest", "Posts"], // Tags for cache invalidation
   endpoints: (builder) => ({
-    // Posts Endpoints
+    // Mutation for creating a new post
     createPost: builder.mutation({
       query: (newPost) => ({
         newPost,
       }),
       async onQueryStarted(newPost, { dispatch, queryFulfilled }) {
         try {
+          // Update the cache with the new post
           const patchResultLatest = dispatch(
             apiSlice.util.updateQueryData(
               "getLatestPosts",
@@ -168,30 +201,58 @@ export const apiSlice = createApi({
         }
       },
     }),
+    // Mutation for deleting a post
     deletePost: builder.mutation({
       query: (postId) => ({
         deletePostId: postId,
       }),
       invalidatesTags: ["Categories", "Related", "Latest"],
     }),
+    // Mutation for updating a post
+    updatePost: builder.mutation({
+      query: ({ postId, updatePostData }) => ({
+        updatePostId: postId,
+        updatePostData,
+      }),
+      async onQueryStarted(
+        { postId, updatePostData },
+        { dispatch, queryFulfilled }
+      ) {
+        try {
+          // Update the cache with the updated post
+          const patchResult = dispatch(
+            apiSlice.util.updateQueryData("getPostById", postId, (draft) => {
+              return { ...draft, ...updatePostData };
+            })
+          );
 
-    // News Endpoints
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+    // Query for fetching posts by category
     getPostsByCategory: builder.query({
       query: (categoryName) => ({ categoryName }),
       providesTags: ["Categories"],
     }),
+    // Query for fetching a post by ID
     getPostById: builder.query({
       query: (postId) => ({ postId }),
       providesTags: ["Posts"],
     }),
+    // Query for fetching a post by title
     getPostByTitle: builder.query({
       query: (postTitle) => ({ postTitle }),
       providesTags: ["Posts"],
     }),
+    // Query for fetching related posts
     getRelatedPosts: builder.query({
       query: (relatedPostId) => ({ relatedPostId }),
       providesTags: ["Related"],
     }),
+    // Query for fetching the latest posts
     getLatestPosts: builder.query({
       queryFn: async () => {
         const { data: posts, error: postsError } = await supabase
@@ -207,14 +268,15 @@ export const apiSlice = createApi({
         return { data: posts };
       },
       providesTags: ["Latest"],
-      keepUnusedDataFor: 3600,
     }),
   }),
 });
 
+// Export hooks for the queries and mutations
 export const {
   useCreatePostMutation,
   useDeletePostMutation,
+  useUpdatePostMutation,
   useGetPostsByCategoryQuery,
   useGetPostByIdQuery,
   useGetPostByTitleQuery,

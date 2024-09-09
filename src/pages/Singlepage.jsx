@@ -2,7 +2,7 @@ import React from "react";
 import Post from "../components/Postpage/Post";
 import Sidebar from "../components/Postpage/Sidebar";
 import Layout from "../components/ui/Layout";
-import { useGetPostByTitleQuery } from "../features/news/newsApi";
+import { useGetPostByTitleQuery } from "../features/api/apiSlice";
 import { useParams } from "react-router-dom";
 import Loading from "../components/ui/Loading";
 

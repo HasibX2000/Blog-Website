@@ -7,7 +7,6 @@ import SignUp from "../components/Auth/SignUp";
 export default function Authpage() {
   const [signin, setSignin] = useState(true);
   const isLoggedIn = useAuth();
-  console.log(isLoggedIn);
   return (
     <Layout>
       {signin ? (

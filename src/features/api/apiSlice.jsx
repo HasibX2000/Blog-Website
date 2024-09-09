@@ -4,11 +4,51 @@ import supabase from "../../configs/supabase";
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
   baseQuery: async (args, api, extraOptions) => {
-    const { categoryName, postId, postTitle, relatedPostId } = args;
+    const {
+      newPost,
+      deletePostId,
+      categoryName,
+      postId,
+      postTitle,
+      relatedPostId,
+    } = args;
+
+    if (newPost) {
+      try {
+        const { data, error } = await supabase
+          .from("posts")
+          .insert([newPost])
+          .single();
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return { data };
+      } catch (error) {
+        return { error: { message: error.message } };
+      }
+    }
+
+    if (deletePostId) {
+      try {
+        const { data, error } = await supabase
+          .from("posts")
+          .delete()
+          .match({ id: deletePostId });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return { data };
+      } catch (error) {
+        return { error: { message: error.message } };
+      }
+    }
 
     let fetchFunction;
 
-    // Determine which fetch function to use
     if (categoryName) {
       fetchFunction = async () => {
         const { data: posts, error: postsError } = await supabase
@@ -52,7 +92,6 @@ export const apiSlice = createApi({
       };
     } else if (relatedPostId) {
       fetchFunction = async () => {
-        // Step 1: Get the category of the post with the given postId
         const { data: postData, error: postError } = await supabase
           .from("posts")
           .select("category")
@@ -69,13 +108,12 @@ export const apiSlice = createApi({
 
         const category = postData.category;
 
-        // Step 2: Get related posts in the same category
         const { data: relatedPosts, error: relatedPostsError } = await supabase
           .from("posts")
           .select("*")
           .eq("category", category)
-          .neq("id", relatedPostId) // Exclude the current post
-          .limit(5); // Limit to 5 related posts
+          .neq("id", relatedPostId)
+          .limit(5);
 
         if (relatedPostsError) {
           throw new Error(relatedPostsError.message);
@@ -87,7 +125,6 @@ export const apiSlice = createApi({
       return { error: { message: "No valid ID, title, or name provided" } };
     }
 
-    // Fetch new data
     try {
       const data = await fetchFunction();
       return { data };
@@ -95,12 +132,94 @@ export const apiSlice = createApi({
       return { error: { message: error.message } };
     }
   },
-  tagTypes: ["User", "Posts"], // Define your tag types here
+  tagTypes: ["Categories", "Related", "Latest", "Posts"],
   endpoints: (builder) => ({
-    // Define your endpoints here
+    // Posts Endpoints
+    createPost: builder.mutation({
+      query: (newPost) => ({
+        newPost,
+      }),
+      async onQueryStarted(newPost, { dispatch, queryFulfilled }) {
+        try {
+          const patchResultLatest = dispatch(
+            apiSlice.util.updateQueryData(
+              "getLatestPosts",
+              undefined,
+              (draft) => {
+                draft.unshift(newPost);
+              }
+            )
+          );
+
+          const patchResultCategory = dispatch(
+            apiSlice.util.updateQueryData(
+              "getPostsByCategory",
+              newPost.category,
+              (draft) => {
+                draft.unshift(newPost);
+              }
+            )
+          );
+
+          await queryFulfilled;
+        } catch {
+          patchResultLatest.undo();
+          patchResultCategory.undo();
+        }
+      },
+    }),
+    deletePost: builder.mutation({
+      query: (postId) => ({
+        deletePostId: postId,
+      }),
+      invalidatesTags: ["Categories", "Related", "Latest"],
+    }),
+
+    // News Endpoints
+    getPostsByCategory: builder.query({
+      query: (categoryName) => ({ categoryName }),
+      providesTags: ["Categories"],
+    }),
+    getPostById: builder.query({
+      query: (postId) => ({ postId }),
+      providesTags: ["Posts"],
+    }),
+    getPostByTitle: builder.query({
+      query: (postTitle) => ({ postTitle }),
+      providesTags: ["Posts"],
+    }),
+    getRelatedPosts: builder.query({
+      query: (relatedPostId) => ({ relatedPostId }),
+      providesTags: ["Related"],
+    }),
+    getLatestPosts: builder.query({
+      queryFn: async () => {
+        const { data: posts, error: postsError } = await supabase
+          .from("posts")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (postsError) {
+          return { error: { message: postsError.message } };
+        }
+
+        return { data: posts };
+      },
+      providesTags: ["Latest"],
+      keepUnusedDataFor: 3600,
+    }),
   }),
 });
 
-export const {} = apiSlice;
+export const {
+  useCreatePostMutation,
+  useDeletePostMutation,
+  useGetPostsByCategoryQuery,
+  useGetPostByIdQuery,
+  useGetPostByTitleQuery,
+  useGetRelatedPostsQuery,
+  useGetLatestPostsQuery,
+} = apiSlice;
 
 export default apiSlice;

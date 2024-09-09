@@ -1,15 +1,25 @@
 import React from "react";
 import Image from "../ui/Image";
 import { Link } from "react-router-dom";
-import { useGetPostByIdQuery } from "../../features/news/newsApi";
+import { useGetPostByIdQuery } from "../../features/api/apiSlice";
 import Loading from "../ui/Loading";
 
-export default function FeaturedCard() {
-  const postId = "7e1c2f2e-3a4b-4b5d-8e1c-1f3a5b6c7d8e";
+export default function FeaturedCard({ postId }) {
   const { data: post, error, isLoading } = useGetPostByIdQuery(postId);
 
   if (isLoading) return <Loading />;
   if (error) return <p>Error: {error.message}</p>; // Ensure error.message is a string
+
+  const TextExtractor = ({ htmlContent }) => {
+    // Create a temporary div to hold the HTML content
+    const div = document.createElement("div");
+    div.innerHTML = htmlContent;
+
+    // Extract text content from the temporary div
+    const textContent = div.textContent || div.innerText || "";
+
+    return <p className="line-clamp-4 leading-6">{textContent}</p>;
+  };
   return (
     <div className="space-y-3">
       <Link to={`/news/${post.title}`}>
@@ -21,6 +31,8 @@ export default function FeaturedCard() {
             {post.title}
           </h2>
         </Link>
+
+        <TextExtractor htmlContent={post.content} />
 
         {post.featured && (
           <div className="bg-blue-500 text-white font-semibold px-2 py-1 inline-block absolute top-4 right-4">

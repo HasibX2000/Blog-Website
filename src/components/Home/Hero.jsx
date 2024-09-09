@@ -2,9 +2,8 @@ import React from "react";
 import Layout from "../ui/Layout";
 import NewsCard from "../Cards/NewsCard";
 import FeaturedCard from "../Cards/FeaturedCard";
-import { useGetLatestPostsQuery } from "../../features/news/newsApi";
-
 import Loading from "../ui/Loading";
+import { useGetLatestPostsQuery } from "../../features/api/apiSlice";
 
 export default function Hero() {
   const {
@@ -14,6 +13,7 @@ export default function Hero() {
     isError,
   } = useGetLatestPostsQuery() || [];
   const [firstItem, ...remainingItems] = latestPosts || [];
+
   let content = null;
   if (isLoading) {
     content = <Loading />;
@@ -32,7 +32,7 @@ export default function Hero() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* First column with 1 row */}
             <div className="border p-4">
-              <FeaturedCard post={firstItem} />
+              <FeaturedCard postId={firstItem.id} />
             </div>
 
             {/* Second column with 2 rows */}

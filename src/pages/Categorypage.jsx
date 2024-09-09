@@ -4,7 +4,7 @@ import NewsCard from "../components/Cards/NewsCard";
 import Pagination from "../components/ui/Pagination";
 import { useParams } from "react-router-dom";
 import Loading from "../components/ui/Loading";
-import { useGetPostsByCategoryQuery } from "../features/news/newsApi";
+import { useGetPostsByCategoryQuery } from "../features/api/apiSlice";
 
 export default function CategoryPage() {
   const { category } = useParams();

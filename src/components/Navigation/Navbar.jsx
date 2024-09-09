@@ -45,6 +45,7 @@ export default function Navbar() {
 
     return () => clearInterval(interval);
   }, []);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -61,6 +62,12 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (location.pathname === "/") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
     setMenuOpen(false);
   }, [location]);
 

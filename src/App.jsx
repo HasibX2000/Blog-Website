@@ -1,5 +1,9 @@
 import React, { useEffect } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  ScrollRestoration,
+} from "react-router-dom";
 import Navbar from "./components/Navigation/Navbar";
 import Homepage from "./pages/Homepage";
 import Footer from "./components/Navigation/Footer";
@@ -44,6 +48,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
+
   {
     path: "/news/:title",
     element: (
@@ -69,6 +74,7 @@ const router = createBrowserRouter([
     ),
   },
 ]);
+
 const App = () => {
   const dispatch = useDispatch();
 
@@ -108,7 +114,11 @@ const App = () => {
     getUserAndSession();
   }, [dispatch]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <RouterProvider router={router}>
+      <ScrollRestoration /> {/* Include ScrollRestoration */}
+    </RouterProvider>
+  );
 };
 
 export default App;

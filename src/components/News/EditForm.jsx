@@ -1,29 +1,17 @@
-import React, { useState, useRef, useMemo } from "react";
-import { useCreatePostMutation } from "../../features/api/apiSlice";
-import { v4 as uuidv4 } from "uuid";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  useGetPostByTitleQuery,
+  useUpdatePostMutation,
+} from "../../features/api/apiSlice";
 import JoditEditor from "jodit-react";
 
-const Form = () => {
-  const placeholder = "Start typing";
+const EditForm = () => {
+  const { title } = useParams();
+  const { data: post, isLoading, error } = useGetPostByTitleQuery(title);
+  const [updatePost] = useUpdatePostMutation();
+  const navigate = useNavigate();
   const editor = useRef(null);
-  const config = useMemo(
-    () => ({
-      readonly: false, // all options from https://xdsoft.net/jodit/docs/
-      placeholder: "Start typings...",
-    }),
-    [placeholder]
-  );
-  const categories = [
-    "Science",
-    "Business",
-    "National",
-    "Sports",
-    "Entertainment",
-    "International",
-    "Politics",
-    "Health",
-  ];
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -31,8 +19,26 @@ const Form = () => {
     thumbnail: "",
     featured: false,
   });
-  const navigate = useNavigate();
-  const [createPost, { isLoading, isSuccess }] = useCreatePostMutation();
+
+  useEffect(() => {
+    if (post) {
+      setFormData({
+        title: post.title,
+        content: post.content,
+        category: post.category || "",
+        thumbnail: post.thumbnail,
+        featured: post.featured,
+      });
+    }
+  }, [post]);
+
+  const config = useMemo(
+    () => ({
+      readonly: false,
+      placeholder: "Start typing...",
+    }),
+    []
+  );
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -46,45 +52,19 @@ const Form = () => {
     setFormData((prev) => ({ ...prev, content }));
   };
 
-  const getFormattedDate = () => {
-    // Get the current UTC date and time
-    const date = new Date();
-
-    // Format the date and time in 'YYYY-MM-DD HH:MM:SS' format
-    const formattedDate = date
-      .toLocaleString("en-CA", {
-        timeZone: "UTC",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      })
-      .replace(",", ""); // Replace any commas
-
-    // Add +00 (UTC) at the end
-    return `${formattedDate}+00`;
-  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const timestamp = getFormattedDate();
-
-    const newPostData = {
-      ...formData,
-      created_at: timestamp,
-      id: uuidv4(),
-    };
-
     try {
-      await createPost(newPostData).unwrap();
+      await updatePost({ postId: post.id, updatedPostData: formData }).unwrap();
       navigate("/", { replace: true });
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error("Error updating post:", error);
     }
   };
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error loading post: {error.message}</p>;
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg">
@@ -114,7 +94,7 @@ const Form = () => {
             ref={editor}
             value={formData.content}
             config={config}
-            tabIndex={1} // tabIndex of textarea
+            tabIndex={1}
             onBlur={handleEditorChange}
           />
         </div>
@@ -135,7 +115,17 @@ const Form = () => {
             required
           >
             <option value="">Select a category</option>
-            {categories.map((category) => (
+            {/* Add category options */}
+            {[
+              "Science",
+              "Business",
+              "National",
+              "Sports",
+              "Entertainment",
+              "International",
+              "Politics",
+              "Health",
+            ].map((category) => (
               <option key={category} value={category}>
                 {category}
               </option>
@@ -182,7 +172,7 @@ const Form = () => {
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 hover:bg-blue-600 transition duration-200"
           >
-            Add News
+            Edit Post
           </button>
         </div>
       </form>
@@ -190,4 +180,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default EditForm;

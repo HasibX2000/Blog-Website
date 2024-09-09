@@ -1,11 +1,14 @@
+// File: apiSlice.js
+// This file defines API endpoints for post queries using Supabase with RTK Query.
+
 import { createApi } from "@reduxjs/toolkit/query/react";
 import supabase from "../../configs/supabase";
 
 // Define the API slice for interacting with Supabase
 export const apiSlice = createApi({
-  reducerPath: "apiSlice", // The slice's key in the Redux store
+  reducerPath: "apiSlice", // The key in the Redux store for this API slice
   baseQuery: async (args, api, extraOptions) => {
-    // Extract arguments from the `args` object
+    // Extract arguments for various operations
     const {
       newPost,
       deletePostId,
@@ -15,7 +18,10 @@ export const apiSlice = createApi({
       postId,
       postTitle,
       relatedPostId,
+      searchTerm,
     } = args;
+
+    let fetchFunction;
 
     // Handle creating a new post
     if (newPost) {
@@ -24,14 +30,10 @@ export const apiSlice = createApi({
           .from("posts")
           .insert([newPost])
           .single();
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        return { data };
+        if (error) throw new Error(error.message);
+        return { data }; // Return the data if successful
       } catch (error) {
-        return { error: { message: error.message } };
+        return { error: { message: error.message } }; // Return error message if there was an error
       }
     }
 
@@ -42,14 +44,10 @@ export const apiSlice = createApi({
           .from("posts")
           .delete()
           .match({ id: deletePostId });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        return { data };
+        if (error) throw new Error(error.message);
+        return { data }; // Return the data if successful
       } catch (error) {
-        return { error: { message: error.message } };
+        return { error: { message: error.message } }; // Return error message if there was an error
       }
     }
 
@@ -60,85 +58,62 @@ export const apiSlice = createApi({
           .from("posts")
           .update(updatePostData)
           .match({ id: updatePostId });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        return { data };
+        if (error) throw new Error(error.message);
+        return { data }; // Return the updated data if successful
       } catch (error) {
-        return { error: { message: error.message } };
+        return { error: { message: error.message } }; // Return error message if there was an error
       }
     }
 
-    // Define a function to fetch data based on the provided arguments
-    let fetchFunction;
+    // Define fetchFunction based on the provided arguments
 
     // Fetch posts by category
     if (categoryName) {
       fetchFunction = async () => {
-        const { data: posts, error: postsError } = await supabase
+        const { data: posts, error } = await supabase
           .from("posts")
           .select("*")
           .eq("category", categoryName);
-
-        if (postsError) {
-          throw new Error(postsError.message);
-        }
-
-        return posts;
+        if (error) throw new Error(error.message);
+        return posts; // Return posts that match the category
       };
     }
     // Fetch post by ID
     else if (postId) {
       fetchFunction = async () => {
-        const { data: post, error: postError } = await supabase
+        const { data: post, error } = await supabase
           .from("posts")
           .select("*")
           .eq("id", postId)
           .single();
-
-        if (postError) {
-          throw new Error(postError.message);
-        }
-
-        return post;
+        if (error) throw new Error(error.message);
+        return post; // Return the post with the specified ID
       };
     }
     // Fetch post by title
     else if (postTitle) {
       fetchFunction = async () => {
-        const { data: post, error: postError } = await supabase
+        const { data: post, error } = await supabase
           .from("posts")
           .select("*")
           .eq("title", postTitle)
           .single();
-
-        if (postError) {
-          throw new Error(postError.message);
-        }
-
-        return post;
+        if (error) throw new Error(error.message);
+        return post; // Return the post with the specified title
       };
     }
     // Fetch related posts based on the category of the related post
     else if (relatedPostId) {
       fetchFunction = async () => {
-        const { data: postData, error: postError } = await supabase
+        const { data: postData, error } = await supabase
           .from("posts")
           .select("category")
           .eq("id", relatedPostId)
           .single();
+        if (error) throw new Error(error.message);
 
-        if (postError) {
-          throw new Error(postError.message);
-        }
-
-        if (!postData) {
-          throw new Error("Post not found.");
-        }
-
-        const category = postData.category;
+        const category = postData?.category;
+        if (!category) throw new Error("Post not found.");
 
         const { data: relatedPosts, error: relatedPostsError } = await supabase
           .from("posts")
@@ -146,22 +121,29 @@ export const apiSlice = createApi({
           .eq("category", category)
           .neq("id", relatedPostId)
           .limit(5);
-
-        if (relatedPostsError) {
-          throw new Error(relatedPostsError.message);
-        }
-
-        return relatedPosts;
+        if (relatedPostsError) throw new Error(relatedPostsError.message);
+        return relatedPosts; // Return related posts based on the category
+      };
+    }
+    // Search posts by term
+    else if (searchTerm) {
+      fetchFunction = async () => {
+        const { data: posts, error } = await supabase
+          .from("posts")
+          .select("*")
+          .or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
+        if (error) throw new Error(error.message);
+        return posts; // Return posts that match the search term
       };
     } else {
-      return { error: { message: "No valid ID, title, or name provided" } };
+      return { error: { message: "No valid parameters provided" } }; // Handle invalid parameters
     }
 
     try {
-      const data = await fetchFunction();
-      return { data };
+      const data = await fetchFunction(); // Call the appropriate fetch function
+      return { data }; // Return the fetched data
     } catch (error) {
-      return { error: { message: error.message } };
+      return { error: { message: error.message } }; // Return error message if there was an error
     }
   },
   tagTypes: ["Categories", "Related", "Latest", "Posts"], // Tags for cache invalidation
@@ -173,7 +155,7 @@ export const apiSlice = createApi({
       }),
       async onQueryStarted(newPost, { dispatch, queryFulfilled }) {
         try {
-          // Update the cache with the new post
+          // Update the cache with the new post for relevant queries
           const patchResultLatest = dispatch(
             apiSlice.util.updateQueryData(
               "getLatestPosts",
@@ -194,8 +176,9 @@ export const apiSlice = createApi({
             )
           );
 
-          await queryFulfilled;
+          await queryFulfilled; // Wait for the mutation to complete
         } catch {
+          // Undo cache updates if the mutation fails
           patchResultLatest.undo();
           patchResultCategory.undo();
         }
@@ -206,7 +189,7 @@ export const apiSlice = createApi({
       query: (postId) => ({
         deletePostId: postId,
       }),
-      invalidatesTags: ["Categories", "Related", "Latest"],
+      invalidatesTags: ["Categories", "Related", "Latest"], // Invalidate tags to refresh relevant queries
     }),
     // Mutation for updating a post
     updatePost: builder.mutation({
@@ -225,9 +208,9 @@ export const apiSlice = createApi({
               return { ...draft, ...updatePostData };
             })
           );
-
-          await queryFulfilled;
+          await queryFulfilled; // Wait for the mutation to complete
         } catch {
+          // Undo cache update if the mutation fails
           patchResult.undo();
         }
       },
@@ -235,44 +218,65 @@ export const apiSlice = createApi({
     // Query for fetching posts by category
     getPostsByCategory: builder.query({
       query: (categoryName) => ({ categoryName }),
-      providesTags: ["Categories"],
+      providesTags: ["Categories"], // Tags to refresh the cache
     }),
     // Query for fetching a post by ID
     getPostById: builder.query({
       query: (postId) => ({ postId }),
-      providesTags: ["Posts"],
+      providesTags: ["Posts"], // Tags to refresh the cache
     }),
     // Query for fetching a post by title
     getPostByTitle: builder.query({
       query: (postTitle) => ({ postTitle }),
-      providesTags: ["Posts"],
+      providesTags: ["Posts"], // Tags to refresh the cache
     }),
     // Query for fetching related posts
     getRelatedPosts: builder.query({
       query: (relatedPostId) => ({ relatedPostId }),
-      providesTags: ["Related"],
+      providesTags: ["Related"], // Tags to refresh the cache
     }),
     // Query for fetching the latest posts
     getLatestPosts: builder.query({
       queryFn: async () => {
-        const { data: posts, error: postsError } = await supabase
+        const { data: posts, error } = await supabase
           .from("posts")
           .select("*")
           .order("created_at", { ascending: false })
           .limit(5);
-
-        if (postsError) {
-          return { error: { message: postsError.message } };
+        if (error) return { error: { message: error.message } };
+        return { data: posts }; // Return the latest posts
+      },
+      providesTags: ["Latest"], // Tags to refresh the cache
+    }),
+    // Query for searching posts
+    searchPosts: builder.query({
+      query: (searchTerm) => ({
+        searchTerm,
+      }),
+      async queryFn(searchTerm) {
+        if (!searchTerm || searchTerm.trim() === "") {
+          return { error: { message: "Search term is required" } }; // Handle missing or empty search term
         }
 
-        return { data: posts };
+        try {
+          const { data: posts, error } = await supabase
+            .from("posts")
+            .select("*")
+            .or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
+          if (error) {
+            return { error: { message: error.message } };
+          }
+          return { data: posts }; // Return posts matching the search term
+        } catch (error) {
+          return { error: { message: error.message } }; // Return error message if there was an error
+        }
       },
-      providesTags: ["Latest"],
+      providesTags: ["Posts"], // Tags to refresh the cache
     }),
   }),
 });
 
-// Export hooks for the queries and mutations
+// Export hooks for the API endpoints
 export const {
   useCreatePostMutation,
   useDeletePostMutation,
@@ -282,6 +286,7 @@ export const {
   useGetPostByTitleQuery,
   useGetRelatedPostsQuery,
   useGetLatestPostsQuery,
+  useSearchPostsQuery,
 } = apiSlice;
 
 export default apiSlice;

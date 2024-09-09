@@ -1,20 +1,17 @@
 // File: Navbar.js
-// This component represents the navigation bar of the website. It includes site branding, search functionality,
-// date and time display, a responsive menu, and user information.
+// This component renders the site's navigation bar, including a logo, search functionality, and category links.
 
 import React, { useEffect, useState } from "react";
-import Layout from "../ui/Layout"; // Layout component to structure the navbar
-import { Link, useLocation } from "react-router-dom"; // Link component for navigation, useLocation for route info
-import SiteLogo from "../../assets/logo.png"; // Path to the site logo image
-import Clock from "../../assets/clock.svg"; // Path to the clock icon
-import Calendar from "../../assets/calendar.svg"; // Path to the calendar icon
-import CurrentUser from "../Auth/CurrentUser"; // Component to display current user info
+import Layout from "../ui/Layout";
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import SiteLogo from "../../assets/logo.png"; // Site logo image
+import Clock from "../../assets/clock.svg"; // Clock icon for current time
+import Calendar from "../../assets/calendar.svg"; // Calendar icon for current date
+import CurrentUser from "../Auth/CurrentUser"; // Component to display current user information
 
 export default function Navbar() {
-  // Get the current location object to determine the current route
-  const location = useLocation();
-
-  // Array of category names for the navigation menu
+  const location = useLocation(); // Hook to get the current location
+  const navigate = useNavigate(); // Initialize useNavigate for programmatic navigation
   const categories = [
     "Science",
     "Business",
@@ -26,7 +23,9 @@ export default function Navbar() {
     "Health",
   ];
 
-  // State for storing the current date and time
+  const [searchTerm, setSearchTerm] = useState(""); // State to manage the search term
+
+  // State to manage the current date and time
   const [dateTime, setDateTime] = useState({
     date: new Date().toLocaleDateString(),
     time: new Date().toLocaleTimeString({
@@ -36,8 +35,7 @@ export default function Navbar() {
     }),
   });
 
-  // State to control the mobile menu visibility
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // State to manage the mobile menu open/closed state
 
   // Update date and time every second
   useEffect(() => {
@@ -53,11 +51,10 @@ export default function Navbar() {
       });
     }, 1000);
 
-    // Cleanup the interval on component unmount
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
 
-  // Handle window resize to close the mobile menu when the screen is resized to a larger size
+  // Close mobile menu on resize to larger screens
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -67,14 +64,13 @@ export default function Navbar() {
 
     window.addEventListener("resize", handleResize);
 
-    // Check initial window size on load
+    // Check on initial load
     handleResize();
 
-    // Cleanup event listener on component unmount
-    return () => window.removeEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize); // Cleanup resize event listener
   }, []);
 
-  // Scroll to the top of the page when navigating to the homepage
+  // Scroll to top on location change and close mobile menu
   useEffect(() => {
     if (location.pathname === "/") {
       window.scrollTo({
@@ -82,7 +78,7 @@ export default function Navbar() {
         behavior: "smooth",
       });
     }
-    setMenuOpen(false); // Close mobile menu on route change
+    setMenuOpen(false);
   }, [location]);
 
   // Toggle mobile menu visibility
@@ -90,16 +86,25 @@ export default function Navbar() {
     setMenuOpen(!menuOpen);
   };
 
+  // Handle search form submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault(); // Prevent default form submission
+    if (searchTerm.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchTerm.trim())}`); // Navigate to search results page with query
+    }
+  };
+
   return (
     <div className="bg-primary border-b sticky top-0 drop-shadow-sm z-50">
-      <Layout className="flex justify-between items-center">
-        {/* Site logo with link to homepage */}
+      <Layout className="flex justify-between items-center ">
+        {/* Logo */}
         <Link to="/">
-          <img src={SiteLogo} alt="SiteLogo" className="h-10" />
+          <img src={SiteLogo} alt="SiteLogo" className="h-10" />{" "}
+          {/* Site logo */}
         </Link>
 
-        {/* Search form for larger screens */}
-        <form className="w-1/4 hidden md:block">
+        {/* Search Form */}
+        <form className="w-1/4 hidden md:block" onSubmit={handleSearchSubmit}>
           <div className="relative">
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
               <svg
@@ -123,25 +128,29 @@ export default function Navbar() {
               id="default-search"
               className="block p-2 w-full ps-10 text-sm border focus:outline-none"
               placeholder="Search..."
+              value={searchTerm} // Bind the search term to the input field
+              onChange={(e) => setSearchTerm(e.target.value)} // Update the search term state
               required
             />
           </div>
         </form>
 
-        {/* Display date and time for larger screens */}
+        {/* Date and Time Display */}
         <div className="space-y-1 hidden md:block">
           <p className="text-secondary flex items-center gap-2">
-            <img src={Clock} alt="clock" /> {dateTime.time}
+            <img src={Clock} alt="clock" /> {dateTime.time}{" "}
+            {/* Display current time */}
           </p>
           <p className="text-secondary flex items-center gap-2">
-            <img src={Calendar} alt="Calendar" /> {dateTime.date}
+            <img src={Calendar} alt="Calendar" /> {dateTime.date}{" "}
+            {/* Display current date */}
           </p>
         </div>
 
-        {/* Mobile menu button */}
+        {/* Mobile Menu Button */}
         <button
           className="block md:hidden text-secondary focus:outline-none"
-          onClick={toggleMenu}
+          onClick={toggleMenu} // Toggle menu visibility on click
         >
           <svg
             className="w-6 h-6"
@@ -160,7 +169,7 @@ export default function Navbar() {
         </button>
       </Layout>
 
-      {/* Mobile menu items */}
+      {/* Mobile Menu */}
       <div className="relative md:flex justify-center items-center">
         {menuOpen && (
           <Layout className="py-custom">
@@ -170,29 +179,30 @@ export default function Navbar() {
                   key={categoryName}
                   className="text-lg font-semibold text-secondary hover:text-blue-500 duration-150"
                 >
-                  <Link to={`/category/${categoryName}`}>{categoryName}</Link>
+                  <Link to={`/category/${categoryName}`}>{categoryName}</Link>{" "}
+                  {/* Category link */}
                 </li>
               ))}
             </ul>
           </Layout>
         )}
-
-        {/* Desktop menu items */}
+        {/* Desktop Menu */}
         <ul className="hidden md:flex gap-5 overflow-auto md:overflow-hidden overflow-y-hidden mb-4">
           {categories.map((categoryName) => (
             <li
               key={categoryName}
               className="inline-block text-lg font-semibold text-secondary hover:text-blue-500 duration-150 hover:scale-105"
             >
-              <Link to={`/category/${categoryName}`}>{categoryName}</Link>
+              <Link to={`/category/${categoryName}`}>{categoryName}</Link>{" "}
+              {/* Category link */}
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Display current user information */}
+      {/* Current User Display */}
       <div className="flex justify-center items-center mb-5">
-        <CurrentUser />
+        <CurrentUser /> {/* Component to display current user information */}
       </div>
     </div>
   );
